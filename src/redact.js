@@ -1,6 +1,6 @@
 // Deterministic shield: patterns that must never depend on a model's recall.
 const PATTERNS = [
-  ['EMAIL', /[\w.+-]+@[\w-]+\.[\w.-]+/g],
+  ['EMAIL', /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g],
   ['PHONE', /(?:\+?\d{1,3}[\s.-]?)?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}\b/g],
   ['SSN', /\b\d{3}-\d{2}-\d{4}\b/g],
   ['CARD', /\b(?:\d[ -]?){13,16}\b/g],

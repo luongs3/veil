@@ -1,7 +1,7 @@
 import './style.css';
 import { initializeApp } from 'firebase/app';
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
-import { getAI, getGenerativeModel, GoogleAIBackend, InferenceMode, Schema } from 'firebase/ai';
+import { getAI, getGenerativeModel, GoogleAIBackend, InferenceMode } from 'firebase/ai';
 import { firebaseConfig, RECAPTCHA_SITE_KEY, CLOUD_MODEL } from './config.js';
 import { regexScan, applyRedactions, rehydrate, leakCheck } from './redact.js';
 import { SAMPLES } from './samples.js';
@@ -17,8 +17,17 @@ const deviceOpts = {
     expectedOutputs: [{ type: 'text', languages: ['en'] }],
   },
 };
-// Stages 1 + 3: on-device only. Raw text never takes the cloud path.
-const localModel = getGenerativeModel(ai, { mode: InferenceMode.ONLY_ON_DEVICE, onDeviceParams: deviceOpts });
+const NER_TYPES = ['PERSON', 'ORG', 'ADDRESS', 'LOCATION', 'DATE', 'PHONE', 'EMAIL', 'ID'];
+const nerJsonSchema = {
+  type: 'object',
+  properties: { entities: { type: 'array', items: { type: 'object', properties: { text: { type: 'string' }, type: { type: 'string', enum: NER_TYPES } }, required: ['text', 'type'] } } },
+  required: ['entities'],
+};
+// Stage 1: on-device only, JSON-constrained decoding on Gemini Nano. Raw text never takes the cloud path.
+const localModel = getGenerativeModel(ai, {
+  mode: InferenceMode.ONLY_ON_DEVICE,
+  onDeviceParams: { ...deviceOpts, promptOptions: { responseConstraint: nerJsonSchema } },
+});
 // Stage 2: cloud only. Receives redacted text exclusively.
 const cloudModel = getGenerativeModel(ai, { mode: InferenceMode.ONLY_IN_CLOUD, inCloudParams: { model: CLOUD_MODEL } });
 // Low-stakes helper (title of an already-redacted note): true hybrid, prefer on-device, fall back to cloud.
@@ -57,27 +66,20 @@ $('download').onclick = async () => {
   await probeDevice();
 };
 
-const NER_PROMPT = (text) => `You find personal data in text. List every person name, organization tied to a person, street address, city, date of birth, phone number, email, ID / account / policy / case / medical record number in the text below.
-Return JSON only: {"entities":[{"text":"<exact substring>","type":"PERSON|ORG|ADDRESS|LOCATION|DATE|PHONE|EMAIL|ID"}]}
+const NER_PROMPT = (text) => `List every personal-data item (person names, street addresses, cities, organizations, dates, phone numbers, emails, ID numbers) in this text, copying each exactly as it appears.
 
 TEXT:
 ${text}`;
 
-const entitySchema = Schema.object({
-  properties: {
-    entities: Schema.array({ items: Schema.object({ properties: { text: Schema.string(), type: Schema.string() } }) }),
-  },
-});
+// Drop model hits that are too generic to redact safely (bare small numbers, weekdays).
+const tooGeneric = (v) => /^\d{1,4}$/.test(v) || /^(mon|tues|wednes|thurs|fri|satur|sun)day$/i.test(v);
 
 async function localNer(text) {
   if (!deviceReady) { log('Gemini Nano unavailable → regex shield only (cloud still sees no raw text)', 'warn'); return []; }
   const t0 = performance.now();
-  const res = await localModel.generateContent({
-    contents: [{ role: 'user', parts: [{ text: NER_PROMPT(text) }] }],
-    generationConfig: { responseMimeType: 'application/json', responseSchema: entitySchema },
-  });
+  const res = await localModel.generateContent(NER_PROMPT(text));
   let ents = [];
-  try { ents = (JSON.parse(res.response.text()).entities || []).filter((e) => e.text && e.text.length > 1 && text.includes(e.text)); }
+  try { ents = (JSON.parse(res.response.text()).entities || []).filter((e) => e.text && text.includes(e.text) && !tooGeneric(e.text.trim())); }
   catch { log('Nano returned non-JSON; regex shield only', 'warn'); }
   log(`Gemini Nano found ${ents.length} entities on-device in ${Math.round(performance.now() - t0)} ms [${res.inferenceSource}]`, 'dev');
   return ents;

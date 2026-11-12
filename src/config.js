@@ -8,4 +8,4 @@ export const firebaseConfig = {
   appId: '1:793228998399:web:bd25f0cdaed67a09fcbeca',
 };
 export const RECAPTCHA_SITE_KEY = '6Lf4ORwuAAAAAFBrBd3wAVuvC1CsKk_IX_o2rFxj';
-export const CLOUD_MODEL = 'gemini-2.5-flash';
+export const CLOUD_MODEL = 'gemini-3.8-flash';
