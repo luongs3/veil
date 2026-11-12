@@ -81,7 +81,7 @@ async function localNer(text) {
   let ents = [];
   try { ents = (JSON.parse(res.response.text()).entities || []).filter((e) => e.text && text.includes(e.text) && !tooGeneric(e.text.trim())); }
   catch { log('Nano returned non-JSON; regex shield only', 'warn'); }
-  log(`Gemini Nano found ${ents.length} entities on-device in ${Math.round(performance.now() - t0)} ms [${res.inferenceSource}]`, 'dev');
+  log(`Gemini Nano found ${ents.length} entities on-device in ${Math.round(performance.now() - t0)} ms [${res.response.inferenceSource}]`, 'dev');
   return ents;
 }
 
@@ -117,7 +117,7 @@ async function run() {
     const t0 = performance.now();
     const res = await cloudModel.generateContent(prompt);
     const answer = res.response.text();
-    log(`${CLOUD_MODEL} answered in ${Math.round(performance.now() - t0)} ms [${res.inferenceSource}]`, 'cloud');
+    log(`${CLOUD_MODEL} answered in ${Math.round(performance.now() - t0)} ms [${res.response.inferenceSource}]`, 'cloud');
     $('out-raw').textContent = answer;
 
     // Stage 3 — on-device: re-hydrate placeholders locally.
@@ -133,7 +133,7 @@ async function quickTitle() {
   const t0 = performance.now();
   try {
     const res = await quickModel.generateContent(`Give a one-line title (max 8 words, keep placeholders) for this note:\n${lastRedacted.slice(0, 1500)}`);
-    log(`Title via ${res.inferenceSource} in ${Math.round(performance.now() - t0)} ms: "${res.response.text().trim()}"`, res.inferenceSource === 'on_device' ? 'dev' : 'cloud');
+    log(`Title via ${res.response.inferenceSource} in ${Math.round(performance.now() - t0)} ms: "${res.response.text().trim()}"`, res.response.inferenceSource === 'on_device' ? 'dev' : 'cloud');
   } catch (e) { log(`Error: ${e.message}`, 'bad'); }
 }
 
