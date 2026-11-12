@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Veil — private by default, smart by cloud</title>
+</head>
+<body>
+  <header>
+    <h1>Veil <span>private by default, smart by cloud</span></h1>
+    <p>Gemini Nano strips personal data <b>on your device</b>. Gemini in the cloud does the heavy thinking on placeholders. Real names come back <b>only on your device</b>. One SDK: Firebase AI Logic.</p>
+    <div class="row"><span id="device" class="badge">Checking on-device model…</span><button id="download" hidden>Download Gemini Nano</button></div>
+  </header>
+  <main>
+    <section class="card">
+      <h2>1 · Your sensitive text <small>(never leaves this tab)</small></h2>
+      <div id="samples" class="row"></div>
+      <textarea id="input" rows="10"></textarea>
+      <label>What should the cloud model do?<input id="task" /></label>
+      <div class="row"><button id="go" class="primary">Veil it → ask Gemini</button><button id="quick">Hybrid title (prefer on-device)</button></div>
+    </section>
+    <section class="card">
+      <h2>2 · On-device vault <small>entities: <b id="stat-ent">0</b> · leaks: <b id="stat-leak">–</b></small></h2>
+      <table><thead><tr><th>placeholder</th><th>real value (local only)</th></tr></thead><tbody id="map"></tbody></table>
+      <h2>3 · Exactly what the cloud received</h2>
+      <pre id="sent"></pre>
+    </section>
+    <section class="card">
+      <h2>4 · Answer, re-hydrated on device</h2>
+      <pre id="out"></pre>
+      <details><summary>Raw cloud answer (placeholders)</summary><pre id="out-raw"></pre></details>
+    </section>
+    <section class="card">
+      <h2>Inference log</h2>
+      <ul id="log"></ul>
+    </section>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

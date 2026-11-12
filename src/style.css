@@ -1,0 +1,25 @@
+:root { --bg:#0e1116; --card:#161b22; --line:#2b323c; --fg:#e6edf3; --mut:#8b949e; --dev:#3fb950; --cloud:#58a6ff; --bad:#f85149; --warn:#d29922; }
+* { box-sizing: border-box; }
+body { margin:0; font:15px/1.5 system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+header { padding:24px 32px 8px; }
+h1 { margin:0; font-size:30px; } h1 span { font-size:16px; color:var(--mut); font-weight:400; margin-left:8px; }
+header p { color:var(--mut); max-width:900px; }
+main { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:16px 32px 32px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; min-width:0; }
+h2 { font-size:15px; margin:0 0 10px; } h2 small { color:var(--mut); font-weight:400; }
+textarea, input { width:100%; background:#0b0e13; color:var(--fg); border:1px solid var(--line); border-radius:6px; padding:8px; font:13px/1.45 ui-monospace, monospace; }
+label { display:block; margin:8px 0; color:var(--mut); font-size:13px; }
+.row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:6px 0; }
+button { background:#21262d; color:var(--fg); border:1px solid var(--line); border-radius:6px; padding:7px 12px; cursor:pointer; }
+button.primary { background:#238636; border-color:#2ea043; font-weight:600; }
+button:disabled { opacity:.5; }
+.chip { font-size:12px; padding:4px 10px; border-radius:20px; }
+.badge { padding:4px 10px; border-radius:20px; border:1px solid var(--line); font-size:13px; }
+.badge.ok { color:var(--dev); border-color:var(--dev); } .badge.warn { color:var(--warn); border-color:var(--warn); }
+pre { white-space:pre-wrap; background:#0b0e13; border:1px solid var(--line); border-radius:6px; padding:10px; font-size:12.5px; max-height:320px; overflow:auto; margin:0 0 10px; }
+table { width:100%; border-collapse:collapse; font-size:12.5px; margin-bottom:12px; }
+td, th { border-bottom:1px solid var(--line); padding:4px 6px; text-align:left; } td:first-child { color:var(--cloud); font-family:ui-monospace, monospace; }
+#log { list-style:none; padding:0; margin:0; font:12.5px ui-monospace, monospace; }
+#log li { padding:3px 0; border-bottom:1px dashed var(--line); }
+#log .dev { color:var(--dev); } #log .cloud { color:var(--cloud); } #log .bad { color:var(--bad); } #log .warn { color:var(--warn); }
+@media (max-width:900px) { main { grid-template-columns:1fr; } }
